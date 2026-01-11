@@ -89,8 +89,8 @@ header {
     }
 }
 
-.word-title {
-    font-size: clamp(36px, 10vw, 72px); /* 최소 36px, 화면의 10%, 최대 72px */
+.word-english {
+    font-size: clamp(36px, 8vw, 56px); /* 최소 36px, 화면의 8%, 최대 56px */
     font-weight: 800;
     letter-spacing: .02em;
     color: var(--accent);
@@ -98,38 +98,16 @@ header {
     max-width: 100%;
 }
 
-.word-title.long-word {
-    font-size: clamp(28px, 6vw, 48px); /* 10자 이상 단어 포함 시 폰트 크기 축소 */
+.word-english.long-word {
+    font-size: clamp(27px, 5vw, 40px); /* 10자 이상 단어 포함 시 폰트 크기 축소 */
 }
 
-.word-translation {
-    font-size: 24px; /* 파생어의 한글 뜻과 동일한 크기 */
-    font-weight: 600;
-    color: var(--accent); /* 표제어의 영어 단어와 동일한 색상 */
-    word-break: keep-all;
-    white-space: pre-wrap;
-}
-
-.mode-toeic .word-title {
-    font-size: clamp(36px, 8vw, 56px); /* 최소 24px, 화면의 8%, 최대 56px */
-}
-
-.mode-toeic .word-title.long-word {
-    font-size: clamp(27px, 5vw, 40px); /* TOEIC 모드에서 긴 단어는 더 작게 */
-}
-
-.mode-toeic .word-translation {
-    color: var(--txt);
+.word-korean {
+    font-size: 18px;
     font-weight: 400;
-    font-size: 18px; /* 원하는 크기로 조절하세요 */
-}
-
-.word-deriv {
-    font-size: 24px; /* Base font size, will be adjusted by JS */
     color: var(--txt);
-    white-space: pre-wrap;
-    line-height: 1.6;
     word-break: keep-all;
+    white-space: pre-wrap;
 }
 
 /* Styles moved from index.html */

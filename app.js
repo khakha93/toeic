@@ -41,106 +41,62 @@ async function initIndexPage() {
     const startForm = document.getElementById('start-form');
     if (!startForm) return;
 
-    const effControls = document.getElementById('eff-controls');
-    const toeicControls = document.getElementById('toeic-controls');
-
-    // 모드 전환 이벤트 리스너
-    const modeRadios = startForm.querySelectorAll('input[name="mode"]');
-    if (effControls && toeicControls) {
-        modeRadios.forEach(radio => {
-            radio.addEventListener('change', (e) => {
-                if (e.target.value === 'EFF') {
-                    effControls.style.display = 'block';
-                    toeicControls.style.display = 'none';
-                } else {
-                    effControls.style.display = 'none';
-                    toeicControls.style.display = 'block';
-                }
-            });
-        });
-    }
-
     startForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
         const formData = new FormData(startForm);
-        const mode = formData.get('mode');
         const isShuffle = formData.get('is_shuffle') === 'on';
         
-        let wordData = [];
         let wordIndices = [];
         let startIndex = 0;
 
-        if (mode === 'EFF') {
-            const rawData = JSON.parse(sessionStorage.getItem('effWordData'));
-            if (!rawData) {
-                alert('단어 데이터가 로드되지 않았습니다. 페이지를 새로고침 해주세요.');
-                return;
-            }
-            // EFF 데이터는 객체 형태이므로 배열처럼 접근하기 위해 키 매핑
-            // 기존 로직 유지를 위해 wordData에 전체 객체를 저장하고 인덱스로 접근
-            sessionStorage.setItem('wordData', JSON.stringify(rawData));
+        try {
+            const response = await fetch('vocab/vocabulary.csv');
+            if (!response.ok) throw new Error('Failed to load vocabulary.csv');
+
+            const text = await response.text();
+            const allToeicData = parseCSV(text);
+
+            const startDay = parseInt(formData.get('start_day'), 10);
+            const endDay = parseInt(formData.get('end_day'), 10);
+
+            sessionStorage.setItem('start_day', startDay);
+            sessionStorage.setItem('end_day', endDay);
+
+            // Day 필터링
+            const filteredData = allToeicData.filter(item => item.day >= startDay && item.day <= endDay);
             
-            startIndex = parseInt(formData.get('start_index'), 10) - 1;
-            wordIndices = Object.keys(rawData).map(Number);
-
-            if (isNaN(startIndex) || startIndex < 0 || startIndex >= wordIndices.length) {
-                startIndex = 0;
-            }
-        } else if (mode === 'TOEIC') {
-            try {
-                const response = await fetch('vocab/vocabulary.csv');
-                if (!response.ok) throw new Error('Failed to load vocabulary.csv');
-                const text = await response.text();
-                const allToeicData = parseCSV(text);
-
-                const startDay = parseInt(formData.get('start_day'), 10);
-                const endDay = parseInt(formData.get('end_day'), 10);
-
-                sessionStorage.setItem('start_day', startDay);
-                sessionStorage.setItem('end_day', endDay);
-
-                // Day 필터링
-                const filteredData = allToeicData.filter(item => item.day >= startDay && item.day <= endDay);
-                
-                if (filteredData.length === 0) {
-                    alert('해당 범위에 단어가 없습니다.');
-                    return;
-                }
-
-                // TOEIC 데이터는 배열 형태. 인덱스는 0부터 시작.
-                // wordData에 필터링된 배열을 저장.
-                // viewer에서는 인덱스로 접근하므로, wordIndices는 0 ~ length-1
-                sessionStorage.setItem('wordData', JSON.stringify(filteredData));
-                wordIndices = filteredData.map((_, index) => index);
-                startIndex = 0; // TOEIC 모드는 항상 처음부터 시작 (필터링된 범위 내에서)
-
-            } catch (error) {
-                console.error(error);
-                alert('TOEIC 데이터를 불러오는 데 실패했습니다.');
+            if (filteredData.length === 0) {
+                alert('해당 범위에 단어가 없습니다.');
                 return;
             }
+
+            // TOEIC 데이터는 배열 형태. 인덱스는 0부터 시작.
+            // wordData에 필터링된 배열을 저장.
+            // viewer에서는 인덱스로 접근하므로, wordIndices는 0 ~ length-1
+            sessionStorage.setItem('wordData', JSON.stringify(filteredData));
+            wordIndices = filteredData.map((_, index) => index);
+            startIndex = 0; // TOEIC 모드는 항상 처음부터 시작 (필터링된 범위 내에서)
+
+        } catch (error) {
+            console.error(error);
+            alert('TOEIC 데이터를 불러오는 데 실패했습니다.');
+            return;
         }
 
         if (isShuffle) {
             // Fisher-Yates shuffle
-            // EFF 모드일 때는 startIndex 이후만 섞었으나, TOEIC은 전체(필터된 범위)를 섞음
-            let partToShuffle = mode === 'EFF' ? wordIndices.slice(startIndex) : wordIndices;
+            let partToShuffle = wordIndices;
             
             for (let i = partToShuffle.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [partToShuffle[i], partToShuffle[j]] = [partToShuffle[j], partToShuffle[i]];
             }
             
-            if (mode === 'EFF') {
-                wordIndices.splice(startIndex, partToShuffle.length, ...partToShuffle);
-            } else {
-                wordIndices = partToShuffle;
-            }
+            wordIndices = partToShuffle;
         }
 
         // 세션 정보 저장
-        sessionStorage.setItem('mode', mode);
         sessionStorage.setItem('word_indices', JSON.stringify(wordIndices));
         sessionStorage.setItem('start_index', startIndex);
         sessionStorage.setItem('current_index', startIndex); // 학습 시작 위치
@@ -151,27 +107,6 @@ async function initIndexPage() {
 
         window.location.href = 'viewer.html';
     });
-
-    // 데이터 로드 후 최대 인덱스 설정 (이벤트 리스너 등록 후에 실행)
-    if (document.getElementById('start_index')) {
-        try {
-            const response = await fetch('vocab/data.json');
-            if (!response.ok) throw new Error('Network response was not ok');
-            const data = await response.json();
-            
-            // 전체 단어 데이터를 sessionStorage에 저장 (EFF용)
-            sessionStorage.setItem('effWordData', JSON.stringify(data));
-
-            const maxIndex = Object.keys(data).length;
-            document.getElementById('start_index').max = maxIndex;
-            document.getElementById('max-index-label').textContent = `(최대: ${maxIndex})`;
-
-        } catch (error) {
-            console.error('Failed to load word data:', error);
-            // EFF 모드가 아닐 수도 있으므로 여기서 return 하지 않음
-            // alert('단어 데이터를 불러오는 데 실패했습니다.'); 
-        }
-    }
 
     // TOEIC 모드용 Day Grid 초기화
     try {
@@ -306,11 +241,6 @@ function initViewerPage() {
         return;
     }
 
-    const mode = sessionStorage.getItem('mode') || 'EFF';
-    if (mode === 'TOEIC') {
-        document.body.classList.add('mode-toeic');
-    }
-
     // Wake Lock (화면 꺼짐 방지)
     let wakeLock = null;
     const requestWakeLock = async () => {
@@ -343,8 +273,8 @@ function initViewerPage() {
     });
 
     // DOM 요소 가져오기
-    const titlePane = document.getElementById('title-pane');
-    const derivPane = document.getElementById('deriv-pane');
+    const englishPane = document.getElementById('english-pane');
+    const koreanPane = document.getElementById('korean-pane');
     const screen = document.querySelector('.screen');
 
     const progressElem = document.getElementById('progress-display');
@@ -371,10 +301,6 @@ function initViewerPage() {
     let autoAdvanceTimer = null;
     const DELAY_EN_TO_KO = 3000; // 3초
     const DELAY_KO_TO_NEXT = 2000; // 2초
-
-    if (mode !== 'TOEIC' && dayElem) {
-        dayElem.style.display = 'none';
-    }
 
     // 타이머 시작
     function startTimer() {
@@ -409,30 +335,15 @@ function initViewerPage() {
         clearTimeout(autoAdvanceTimer);
         currentState = 'SHOWING_KO';
 
-        if (mode === 'TOEIC') {
-            // TOEIC 모드: title에 영어 유지, deriv에 한글 뜻 표시
-            titlePane.className = 'word-title'; // 영어 스타일 유지
-            if (currentWord.en.split(' ').some(w => w.length >= 10)) {
-                titlePane.classList.add('long-word');
-            }
-            titlePane.textContent = currentWord.en;
-            
-            derivPane.className = 'word-translation'; // 한글 스타일 적용
-            derivPane.innerHTML = currentWord.ko.replace(/\n/g, '<br>');
-        } else {
-            // EFF 모드 (기존 동작): title에 한글 뜻, deriv에 파생어 한글
-            titlePane.className = 'word-translation';
-            titlePane.textContent = currentWord.ko;
-            titlePane.style.fontSize = ''; // 한글 표시 때는 폰트 크기 초기화
-
-            // deriv_ko의 타입에 따라 올바르게 처리합니다.
-            if (Array.isArray(currentWord.deriv_ko)) {
-                derivPane.textContent = currentWord.deriv_ko.join('\n');
-            } else {
-                // 문자열인 경우, 쉼표를 줄바꿈으로 변경합니다.
-                derivPane.textContent = (currentWord.deriv_ko || '').replace(/, /g, '\n');
-            }
+        // TOEIC 모드: title에 영어 유지, deriv에 한글 뜻 표시
+        englishPane.className = 'word-english'; // 영어 스타일 유지
+        if (currentWord.en.split(' ').some(w => w.length >= 10)) {
+            englishPane.classList.add('long-word');
         }
+        englishPane.textContent = currentWord.en;
+        
+        koreanPane.className = 'word-korean'; // 한글 스타일 적용
+        koreanPane.innerHTML = currentWord.ko.replace(/\n/g, '<br>');
     }
 
     function showNextWord() {
@@ -446,26 +357,15 @@ function initViewerPage() {
 
         currentState = 'SHOWING_EN';
         // 영어 단어를 위한 스타일로 변경
-        titlePane.className = 'word-title';
+        englishPane.className = 'word-english';
         if (currentWord.en.split(' ').some(w => w.length >= 10)) {
-            titlePane.classList.add('long-word');
+            englishPane.classList.add('long-word');
         }
-        titlePane.textContent = currentWord.en;
+        englishPane.textContent = currentWord.en;
 
-        if (mode === 'TOEIC') {
-            // TOEIC 모드: deriv 부분 비움 (또는 필요시 day 정보 등 표시 가능)
-            derivPane.textContent = '';
-            if (dayElem) dayElem.textContent = `Day ${currentWord.day}`;
-        } else {
-            // EFF 모드 (기존 동작): deriv에 파생어 영어
-            // deriv_en의 타입에 따라 올바르게 처리합니다.
-            if (Array.isArray(currentWord.deriv_en)) {
-                derivPane.textContent = currentWord.deriv_en.join('\n');
-            } else {
-                // 문자열인 경우, 쉼표를 줄바꿈으로 변경합니다.
-                derivPane.textContent = (currentWord.deriv_en || '').replace(/, /g, '\n');
-            }
-        }
+        // TOEIC 모드: deriv 부분 비움 (또는 필요시 day 정보 등 표시 가능)
+        koreanPane.textContent = '';
+        if (dayElem) dayElem.textContent = `Day ${currentWord.day}`;
 
         if (isAutoSpeakOn) {
             speak(currentWord.en);
@@ -671,15 +571,12 @@ function initSummaryPage() {
     document.getElementById('total-studied').textContent = totalStudied;
     // document.getElementById('final-progress').textContent = finalProgressStr;
 
-    const mode = sessionStorage.getItem('mode');
-    if (mode === 'TOEIC') {
-        const startDay = sessionStorage.getItem('start_day');
-        const endDay = sessionStorage.getItem('end_day');
-        const dayRangeDisplay = document.getElementById('day-range-display');
-        if (startDay && endDay && dayRangeDisplay) {
-            dayRangeDisplay.style.display = 'block';
-            document.getElementById('day-range-val').textContent = `${startDay} ~ ${endDay}`;
-        }
+    const startDay = sessionStorage.getItem('start_day');
+    const endDay = sessionStorage.getItem('end_day');
+    const dayRangeDisplay = document.getElementById('day-range-display');
+    if (startDay && endDay && dayRangeDisplay) {
+        dayRangeDisplay.style.display = 'block';
+        document.getElementById('day-range-val').textContent = `${startDay} ~ ${endDay}`;
     }
 
     // 미암기 단어 목록 생성 (아코디언 형태)
