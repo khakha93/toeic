@@ -186,6 +186,7 @@ button {
     color: var(--txt);
     border: 1px solid rgba(148, 163, 184, .25);
     transition: transform .04s ease, background .2s ease, border-color .2s ease;
+    word-break: keep-all;
 }
 
 button:hover {
