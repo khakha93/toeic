@@ -1,0 +1,430 @@
+:root {
+    --bg: #0f172a;
+    --card: #111827;
+    --muted: #94a3b8;
+    --txt: #e5e7eb;
+    --accent: #22d3ee;
+    --card-border: rgba(148, 163, 184, .15);
+    --screen-border: rgba(148, 163, 184, .25);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Pretendard, Apple SD Gothic Neo, Malgun Gothic, Arial, sans-serif;
+    background: linear-gradient(180deg, #0b122a, #0f172a);
+    color: var(--txt);
+    min-height: 100vh;
+    min-height: calc(var(--vh, 1vh) * 100);
+    display: grid;
+    place-items: center;
+    padding: 24px;
+}
+
+.app {
+    width: min(900px, 92vw);
+    background: rgba(17, 24, 39, .8);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 28px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, .35);
+    backdrop-filter: blur(6px);
+}
+
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.title {
+    font-weight: 700;
+    letter-spacing: .2px;
+    font-size: 20px;
+}
+
+.muted {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.screen {
+    display: flex;
+    flex-direction: column; /* Default to top-bottom split for mobile */
+    height: 45vh;
+    min-height: 280px;
+    border-radius: 18px;
+    background: radial-gradient(1200px 400px at 50% 0%, rgba(34, 211, 238, .12), transparent), #0b1020;
+    border: 1px dashed var(--screen-border);
+    text-align: center;
+    padding: 0; /* Remove padding to allow panes to fill the space */
+    position: relative;
+}
+
+.word-pane {
+    flex: 1; /* Each pane takes equal space */
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    overflow: hidden;
+}
+
+/* Divider for vertical split */
+.word-pane:first-child {
+    border-bottom: 1px solid var(--screen-border);
+}
+
+@media (min-width: 1024px) {
+    .screen {
+        flex-direction: row; /* Switch to left-right split on wider screens */
+    }
+    .word-pane:first-child {
+        border-bottom: none; /* Remove bottom border */
+        border-right: 1px solid var(--screen-border); /* Add right border for divider */
+    }
+}
+
+.word-title {
+    font-size: clamp(36px, 10vw, 72px); /* 최소 36px, 화면의 10%, 최대 72px */
+    font-weight: 800;
+    letter-spacing: .02em;
+    color: var(--accent);
+    word-break: keep-all; /* 단어 단위로 줄바꿈 */
+    max-width: 100%;
+}
+
+.word-title.long-word {
+    font-size: clamp(28px, 6vw, 48px); /* 10자 이상 단어 포함 시 폰트 크기 축소 */
+}
+
+.word-translation {
+    font-size: 24px; /* 파생어의 한글 뜻과 동일한 크기 */
+    font-weight: 600;
+    color: var(--accent); /* 표제어의 영어 단어와 동일한 색상 */
+    word-break: keep-all;
+    white-space: pre-wrap;
+}
+
+.mode-toeic .word-title {
+    font-size: clamp(36px, 8vw, 56px); /* 최소 24px, 화면의 8%, 최대 56px */
+}
+
+.mode-toeic .word-title.long-word {
+    font-size: clamp(27px, 5vw, 40px); /* TOEIC 모드에서 긴 단어는 더 작게 */
+}
+
+.mode-toeic .word-translation {
+    color: var(--txt);
+    font-weight: 400;
+    font-size: 18px; /* 원하는 크기로 조절하세요 */
+}
+
+.word-deriv {
+    font-size: 24px; /* Base font size, will be adjusted by JS */
+    color: var(--txt);
+    white-space: pre-wrap;
+    line-height: 1.6;
+    word-break: keep-all;
+}
+
+/* Styles moved from index.html */
+.form-group {
+    margin-bottom: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 16px;
+}
+
+.form-group input[type="number"] {
+    width: 100px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--card-border);
+    background: #0b1020;
+    color: var(--txt);
+    font-size: 18px;
+    text-align: center;
+}
+
+button.primary {
+    background: #0ea5e9;
+    border-color: #0ea5e9;
+    color: #051018;
+    width: 100%;
+    padding: 12px;
+    font-size: 18px;
+    margin-top: 1rem;
+}
+
+/* Styles moved from summary.html */
+.summary-content {
+    background: #0b1020;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 18px;
+    border: 1px solid var(--card-border);
+}
+
+.summary-content p {
+    margin: 8px 0;
+    font-size: 16px;
+}
+
+.controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+    justify-content: space-between;
+}
+
+.controls-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+button {
+    appearance: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px 18px;
+    border-radius: 12px;
+    font-weight: 650;
+    font-size: 16px;
+    background: #1f2937;
+    color: var(--txt);
+    border: 1px solid rgba(148, 163, 184, .25);
+    transition: transform .04s ease, background .2s ease, border-color .2s ease;
+}
+
+button:hover {
+    background: #374151;
+    border-color: rgba(148, 163, 184, .5);
+}
+
+button:active {
+    transform: translateY(1px);
+}
+
+button#end-btn {
+    background: #3f1a24;
+    color: #fca5a5;
+    border-color: rgba(248, 113, 113, .3);
+    margin-right: 20px; /* Add extra space after End button */
+}
+
+button#end-btn:hover {
+    background: #5c2231;
+    border-color: rgba(248, 113, 113, .5);
+}
+
+button.review-btn {
+    background: #d97706; /* Amber-600 */
+    border-color: #b45309;
+    color: #fff;
+}
+
+button.review-btn:hover {
+    background: #b45309;
+    border-color: #92400e;
+}
+
+.review-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.review-controls label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 15px;
+    color: var(--txt);
+    user-select: none;
+}
+
+.review-controls input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+
+.screen-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* Vertically align items */
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 12px; /* Add space between info bar and screen */
+    padding: 0 4px; /* Align with app padding */
+    position: relative;
+}
+
+#day-display {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--txt);
+}
+
+.timer-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+#timer-display {
+    cursor: default; /* No pointer needed on summary page */
+    user-select: none; /* Prevent text selection on click */
+    width: 80px; /* Give a fixed width to prevent layout shift */
+    text-align: right;
+    font-size: 14px; /* Ensure icon and text have similar base size */
+    text-align: center; /* Center the icon and text */
+    font-variant-numeric: tabular-nums; /* Ensure numbers have the same width */    
+    height: 24px; /* Set a fixed height to prevent layout shift */
+    line-height: 24px; /* Vertically center the text/icon inside */
+}
+
+@media (max-width: 768px) {
+    .controls {
+        flex-direction: column;
+    }
+
+    .controls-group {
+        width: 100%;
+        flex-wrap: nowrap;
+    }
+
+    .controls-group:first-child {
+        justify-content: flex-end;
+    }
+
+    .controls-group:first-child #end-btn {
+        margin-right: auto;
+    }
+
+    .controls-group:last-child {
+        justify-content: space-between;
+    }
+
+    .controls-group button {
+        width: 25%;
+        padding-left: 0;
+        padding-right: 0;
+    }
+}
+
+/* Day Grid Styles */
+.day-range-group {
+    display: block;
+}
+
+.day-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.day-btn {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    color: var(--muted);
+    padding: 10px 0;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.day-btn:hover {
+    background: var(--card-border);
+    color: var(--txt);
+}
+
+.day-btn.selected {
+    background: var(--accent);
+    color: #051018;
+    border-color: var(--accent);
+    font-weight: 800;
+}
+
+.day-btn.in-range {
+    background: rgba(34, 211, 238, 0.15);
+    color: var(--accent);
+    border-color: rgba(34, 211, 238, 0.3);
+}
+
+/* Review Section Styles (Accordion) */
+.review-section {
+    margin-top: 20px;
+    border-top: 1px solid var(--card-border);
+    padding-top: 20px;
+}
+
+.review-section summary {
+    cursor: pointer;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 10px;
+    list-style: none; /* 기본 화살표 제거 */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 18px;
+}
+
+.review-section summary::after {
+    content: '+';
+    font-weight: 400;
+}
+
+.review-section[open] summary::after {
+    content: '-';
+}
+
+.review-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 300px; /* 너무 길어지면 스크롤 */
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.review-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 15px;
+}
+
+.review-item .en {
+    font-weight: 700;
+    color: var(--txt);
+    margin-right: 10px;
+    text-align: left;
+}
+
+.review-item .ko {
+    color: var(--muted);
+    font-size: 14px;
+    text-align: right;
+    word-break: keep-all;
+    max-width: 60%;
+}
