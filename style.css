@@ -156,16 +156,22 @@ button.primary {
 
 .controls {
     display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-top: 18px;
-    justify-content: space-between;
+    width: 100%;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 20px;
+    gap: 20px;
 }
 
-.controls-group {
+.control-left, .control-right {
     display: flex;
     gap: 10px;
-    flex-wrap: wrap;
+    align-items: center;
+}
+
+.control-center {
+    display: flex;
+    gap: 10px;
 }
 
 button {
@@ -196,6 +202,9 @@ button#end-btn {
     color: #fca5a5;
     border-color: rgba(248, 113, 113, .3);
     margin-right: 20px; /* Add extra space after End button */
+    margin-right: 0;
+    padding: 8px 16px;
+    font-size: 15px;
 }
 
 button#end-btn:hover {
@@ -277,30 +286,37 @@ button.review-btn:hover {
 
 @media (max-width: 768px) {
     .controls {
-        flex-direction: column;
-    }
-
-    .controls-group {
-        width: 100%;
-        flex-wrap: nowrap;
-    }
-
-    .controls-group:first-child {
-        justify-content: flex-end;
-    }
-
-    .controls-group:first-child #end-btn {
-        margin-right: auto;
-    }
-
-    .controls-group:last-child {
         justify-content: space-between;
+        gap: 10px;
     }
 
-    .controls-group button {
-        width: 25%;
-        padding-left: 0;
-        padding-right: 0;
+    .control-left, .control-right {
+        flex-direction: column;
+        flex: 1;
+        gap: 12px;
+    }
+
+    .control-center {
+        flex: 0 0 auto;
+        padding: 0 5px;
+    }
+
+    /* Specific button styles for mobile layout */
+    .control-left button, .control-right button {
+        width: 100%;
+        padding: 10px 0;
+        font-size: 16px;
+    }
+
+    #pause-btn {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        font-size: 28px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 }
 

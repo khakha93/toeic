@@ -385,8 +385,23 @@ function initViewerPage() {
 
     // 이벤트 리스너 설정
     nextBtn.addEventListener('click', () => {
-        // 일시정지 중에도 화면 전환은 허용하되, 타이머는 설정하지 않음
-        showNextWord();
+        // Next 버튼 클릭 시, 현재 단어가 '아는 단어' 목록에 있다면 제거 (모르는 단어로 처리)
+        const lastActualIndex = parseInt(sessionStorage.getItem('last_index'), 10);
+        let passList = JSON.parse(sessionStorage.getItem('pass_rows'));
+        
+        if (lastActualIndex !== -1 && passList.includes(lastActualIndex)) {
+            passList = passList.filter(idx => idx !== lastActualIndex);
+            sessionStorage.setItem('pass_rows', JSON.stringify(passList));
+            updateProgressUI();
+        }
+
+        // 화면 전환 로직: Pass 버튼과 동일하게 단계적으로 진행
+        if (currentState === 'SHOWING_EN') {
+            showKorean();
+        } else {
+            showNextWord();
+        }
+
         if (!isPaused) {
             setNextTimer();
         }
