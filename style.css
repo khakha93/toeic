@@ -89,8 +89,8 @@ header {
     }
 }
 
-.word-title {
-    font-size: clamp(36px, 10vw, 72px); /* 최소 36px, 화면의 10%, 최대 72px */
+.word-english {
+    font-size: clamp(36px, 8vw, 56px); /* 최소 36px, 화면의 8%, 최대 56px */
     font-weight: 800;
     letter-spacing: .02em;
     color: var(--accent);
@@ -98,38 +98,16 @@ header {
     max-width: 100%;
 }
 
-.word-title.long-word {
-    font-size: clamp(28px, 6vw, 48px); /* 10자 이상 단어 포함 시 폰트 크기 축소 */
+.word-english.long-word {
+    font-size: clamp(27px, 5vw, 40px); /* 10자 이상 단어 포함 시 폰트 크기 축소 */
 }
 
-.word-translation {
-    font-size: 24px; /* 파생어의 한글 뜻과 동일한 크기 */
-    font-weight: 600;
-    color: var(--accent); /* 표제어의 영어 단어와 동일한 색상 */
-    word-break: keep-all;
-    white-space: pre-wrap;
-}
-
-.mode-toeic .word-title {
-    font-size: clamp(36px, 8vw, 56px); /* 최소 24px, 화면의 8%, 최대 56px */
-}
-
-.mode-toeic .word-title.long-word {
-    font-size: clamp(27px, 5vw, 40px); /* TOEIC 모드에서 긴 단어는 더 작게 */
-}
-
-.mode-toeic .word-translation {
-    color: var(--txt);
+.word-korean {
+    font-size: 18px;
     font-weight: 400;
-    font-size: 18px; /* 원하는 크기로 조절하세요 */
-}
-
-.word-deriv {
-    font-size: 24px; /* Base font size, will be adjusted by JS */
     color: var(--txt);
-    white-space: pre-wrap;
-    line-height: 1.6;
     word-break: keep-all;
+    white-space: pre-wrap;
 }
 
 /* Styles moved from index.html */
@@ -178,16 +156,22 @@ button.primary {
 
 .controls {
     display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-top: 18px;
-    justify-content: space-between;
+    width: 100%;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 20px;
+    gap: 20px;
 }
 
-.controls-group {
+.control-left, .control-right {
     display: flex;
     gap: 10px;
-    flex-wrap: wrap;
+    align-items: center;
+}
+
+.control-center {
+    display: flex;
+    gap: 10px;
 }
 
 button {
@@ -202,6 +186,7 @@ button {
     color: var(--txt);
     border: 1px solid rgba(148, 163, 184, .25);
     transition: transform .04s ease, background .2s ease, border-color .2s ease;
+    word-break: keep-all;
 }
 
 button:hover {
@@ -218,6 +203,9 @@ button#end-btn {
     color: #fca5a5;
     border-color: rgba(248, 113, 113, .3);
     margin-right: 20px; /* Add extra space after End button */
+    margin-right: 0;
+    padding: 8px 16px;
+    font-size: 15px;
 }
 
 button#end-btn:hover {
@@ -299,30 +287,37 @@ button.review-btn:hover {
 
 @media (max-width: 768px) {
     .controls {
-        flex-direction: column;
-    }
-
-    .controls-group {
-        width: 100%;
-        flex-wrap: nowrap;
-    }
-
-    .controls-group:first-child {
-        justify-content: flex-end;
-    }
-
-    .controls-group:first-child #end-btn {
-        margin-right: auto;
-    }
-
-    .controls-group:last-child {
         justify-content: space-between;
+        gap: 10px;
     }
 
-    .controls-group button {
-        width: 25%;
-        padding-left: 0;
-        padding-right: 0;
+    .control-left, .control-right {
+        flex-direction: column;
+        flex: 1;
+        gap: 12px;
+    }
+
+    .control-center {
+        flex: 0 0 auto;
+        padding: 0 5px;
+    }
+
+    /* Specific button styles for mobile layout */
+    .control-left button, .control-right button {
+        width: 100%;
+        padding: 10px 0;
+        font-size: 16px;
+    }
+
+    #pause-btn {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        font-size: 28px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 }
 
