@@ -289,7 +289,7 @@ function initViewerPage() {
     const speakToggleBtn = document.getElementById('speak-toggle-btn');
 
     let timerInterval;
-    let isPaused = false;
+    let isPaused = true;
     let pauseStartTime = 0;
     let totalPausedTime = 0;
     let isTimerVisible = true;
