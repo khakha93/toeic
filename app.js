@@ -290,9 +290,13 @@ function initViewerPage() {
 
     let timerInterval;
     let isPaused = true;
-    let pauseStartTime = 0;
+    let pauseStartTime = parseFloat(sessionStorage.getItem('start_time'));
     let totalPausedTime = 0;
     let isTimerVisible = true;
+
+    if (isPaused) {
+        pauseBtn.textContent = '▶️';
+    }
     
     let isAutoSpeakOn = false;
     // 상태 관리를 위한 변수 추가
