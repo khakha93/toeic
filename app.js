@@ -104,6 +104,7 @@ async function initIndexPage() {
         sessionStorage.setItem('current_index', startIndex); // 학습 시작 위치
         sessionStorage.setItem('pass_rows', JSON.stringify([]));
         sessionStorage.setItem('start_time', Date.now() / 1000);
+        sessionStorage.setItem('max_index_reached', startIndex);
         sessionStorage.setItem('pause_total', 0);
         sessionStorage.setItem('last_index', -1);
 
@@ -286,6 +287,7 @@ function initViewerPage() {
     const nextBtn = document.getElementById('next-btn');
     const passBtn = document.getElementById('pass-btn');
     const endBtn = document.getElementById('end-btn');
+    const prevBtn = document.getElementById('prev-btn');
     const pauseBtn = document.getElementById('pause-btn');
     const speakBtn = document.getElementById('speak-btn');
     const speakToggleBtn = document.getElementById('speak-toggle-btn');
@@ -297,7 +299,7 @@ function initViewerPage() {
     let isTimerVisible = true;
 
     if (isPaused) {
-        pauseBtn.textContent = '▶️';
+        pauseBtn.textContent = '✋ Manual';
     }
     
     let isAutoSpeakOn = false;
@@ -353,12 +355,29 @@ function initViewerPage() {
     }
 
     function showNextWord() {
+        const displayIndex = parseInt(sessionStorage.getItem('current_index'), 10);
         clearTimeout(autoAdvanceTimer);
-        currentWord = getNextWord();
+        currentWord = getNextWord(); // This increments current_index and sets last_index
 
         if (currentWord.finished) {
             endRun(totalPausedTime);
             return;
+        }
+
+        // 이전에 봤던 단어로 돌아왔을 때, 'Know'/'Review' 상태를 버튼에 표시
+        const maxIndexReached = parseInt(sessionStorage.getItem('max_index_reached'), 10);
+        const lastActualIndex = parseInt(sessionStorage.getItem('last_index'), 10);
+        const passList = JSON.parse(sessionStorage.getItem('pass_rows'));
+
+        passBtn.classList.remove('selected-know');
+        nextBtn.classList.remove('selected-review');
+
+        if (displayIndex < maxIndexReached) { // 과거에 이미 학습한 단어인 경우
+            if (passList.includes(lastActualIndex)) {
+                passBtn.classList.add('selected-know'); // 'Know'로 선택했었음
+            } else {
+                nextBtn.classList.add('selected-review'); // 'Review'로 선택했었음
+            }
         }
 
         currentState = 'SHOWING_EN';
@@ -413,6 +432,24 @@ function initViewerPage() {
         }
     });
     
+    prevBtn.addEventListener('click', () => {
+        const currentIndex = parseInt(sessionStorage.getItem('current_index'), 10);
+        const startIndex = parseInt(sessionStorage.getItem('start_index'), 10);
+
+        // 현재 인덱스가 시작 인덱스보다 최소 2칸 앞서 있어야 이전 단어(1칸 뒤)로 갈 수 있음
+        if (currentIndex > startIndex + 1) {
+            if (!isPaused) {
+                isPaused = true;
+                clearTimeout(autoAdvanceTimer);
+                pauseStartTime = Date.now() / 1000;
+                pauseBtn.textContent = '✋ Manual';
+                releaseWakeLock();
+            }
+            sessionStorage.setItem('current_index', currentIndex - 2);
+            showNextWord();
+        }
+    });
+
     timerElem.addEventListener('click', () => {
         isTimerVisible = !isTimerVisible;
         if (isTimerVisible) {
@@ -451,11 +488,11 @@ function initViewerPage() {
         if (isPaused) {
             clearTimeout(autoAdvanceTimer);
             pauseStartTime = Date.now() / 1000;
-            pauseBtn.textContent = '▶️';
+            pauseBtn.textContent = '✋ Manual';
             releaseWakeLock();
         } else {
             totalPausedTime += (Date.now() / 1000) - pauseStartTime;
-            pauseBtn.textContent = '⏸️';
+            pauseBtn.textContent = '📽️ Auto';
             // 현재 상태에 따라 타이머 재시작
             setNextTimer();
             requestWakeLock();
@@ -511,6 +548,13 @@ function getNextWord() {
     const wordIndices = JSON.parse(sessionStorage.getItem('word_indices'));
     let currentIndex = parseInt(sessionStorage.getItem('current_index'), 10);
     const startIndex = parseInt(sessionStorage.getItem('start_index'), 10);
+    const maxIndexReached = parseInt(sessionStorage.getItem('max_index_reached'), 10);
+
+    // 사용자가 진행한 가장 먼 위치를 기록
+    if (currentIndex > maxIndexReached) {
+        sessionStorage.setItem('max_index_reached', currentIndex);
+    }
+
     const passRows = JSON.parse(sessionStorage.getItem('pass_rows'));
 
     if (currentIndex >= wordIndices.length) {
@@ -651,6 +695,7 @@ function initSummaryPage() {
                 sessionStorage.setItem('pass_rows', JSON.stringify([]));
                 sessionStorage.setItem('start_time', Date.now() / 1000);
                 sessionStorage.setItem('pause_total', 0);
+                sessionStorage.setItem('max_index_reached', 0);
                 sessionStorage.setItem('last_index', -1);
                 sessionStorage.removeItem('total_elapsed');
 

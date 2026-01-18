@@ -297,27 +297,29 @@ button.review-btn:hover {
         gap: 12px;
     }
 
-    .control-center {
+    .control-left {
         flex: 0 0 auto;
-        padding: 0 5px;
+    }
+
+    .control-center {
+        flex: 1;
+        padding: 0;
     }
 
     /* Specific button styles for mobile layout */
-    .control-left button, .control-right button {
+    .control-left button, .control-right button, .control-center button {
         width: 100%;
         padding: 10px 0;
         font-size: 16px;
     }
 
-    #pause-btn {
-        width: 70px;
-        height: 70px;
-        border-radius: 50%;
-        font-size: 28px;
-        padding: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    .control-left button {
+        width: 52px;
+    }
+
+    .control-center {
+        flex-direction: column;
+        gap: 12px;
     }
 }
 
@@ -515,4 +517,20 @@ button.review-btn:hover {
 .header-icon-btn .label {
     font-size: 16px;
     font-weight: 600;
+}
+
+/* --- Viewer Page: Button State --- */
+button#pass-btn.selected-know,
+button#pass-btn.selected-know:hover {
+    background: #16a34a; /* green-600 */
+    border-color: #22c55e; /* green-500 */
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+button#next-btn.selected-review,
+button#next-btn.selected-review:hover {
+    background: #c2410c; /* orange-700 */
+    border-color: #f97316; /* orange-500 */
+    color: #fff;
 }
