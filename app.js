@@ -31,6 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
         initViewerPage();
     } else if (document.body.id === 'page-summary') {
         initSummaryPage();
+    } else if (document.body.id === 'page-search') {
+        initSearchPage();
     }
 });
 
@@ -689,4 +691,59 @@ function initSummaryPage() {
     //     sessionStorage.clear();
     //     window.location.href = 'index.html';
     // });
+}
+
+/**
+ * search.html 페이지 초기화 로직
+ */
+async function initSearchPage() {
+    const searchInput = document.getElementById('search-input');
+    const resultsContainer = document.getElementById('search-results');
+    let allData = [];
+
+    // 데이터 로드
+    try {
+        const response = await fetch('vocab/vocabulary.csv');
+        if (!response.ok) throw new Error('Failed to load vocabulary.csv');
+        const text = await response.text();
+        allData = parseCSV(text);
+    } catch (error) {
+        console.error(error);
+        resultsContainer.innerHTML = '<p style="text-align:center; color:var(--muted);">데이터를 불러오는 데 실패했습니다.</p>';
+        return;
+    }
+
+    // 검색 이벤트 리스너
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        resultsContainer.innerHTML = '';
+
+        if (!query) return;
+
+        const filtered = allData.filter(item => 
+            (item.en && item.en.toLowerCase().includes(query)) || 
+            (item.ko && item.ko.includes(query))
+        );
+
+        if (filtered.length === 0) {
+            resultsContainer.innerHTML = '<p style="text-align:center; color:var(--muted);">검색 결과가 없습니다.</p>';
+            return;
+        }
+
+        filtered.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'search-result-item';
+            div.innerHTML = `
+                <div class="meta">Day ${item.day} <span class="idx">#${item.idx}</span></div>
+                <div class="content">
+                    <span class="en">${item.en}</span>
+                    <span class="ko">${item.ko}</span>
+                </div>
+            `;
+            resultsContainer.appendChild(div);
+        });
+    });
+    
+    // 입력창 자동 포커스
+    searchInput.focus();
 }
