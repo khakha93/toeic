@@ -410,6 +410,13 @@ function initViewerPage() {
 
     // 이벤트 리스너 설정
     nextBtn.addEventListener('click', () => {
+        // for google funnel analysis
+        gtag('event', 'word_learned', {
+        difficulty: 'easy',
+        source: 'next_button'
+        });
+
+
         // Next 버튼 클릭 시, 현재 단어가 '아는 단어' 목록에 있다면 제거 (모르는 단어로 처리)
         const lastActualIndex = parseInt(sessionStorage.getItem('last_index'), 10);
         let passList = JSON.parse(sessionStorage.getItem('pass_rows'));
@@ -512,6 +519,12 @@ function initViewerPage() {
     });
 
     function handleContextualPass() {
+        // for google funnel analysis
+        gtag('event', 'word_learned', {
+        difficulty: 'easy',
+        source: 'pass_button'
+        });
+
         passWord(); // 1. 아는 단어로 기록
         updateProgressUI(); // 2. 진행률 UI 업데이트
         // 3. 기존의 단계별 학습 진행
